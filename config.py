@@ -1,8 +1,8 @@
 import os
 
-TOKEN = os.getenv("TOKEN")
-ADMIN_TOKEN = os.getenv("ADMIN_TOKEN")
-ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID")
+TOKEN = os.getenv("TOKEN", "8930765155:AAG2bM8pWBwVdcObvoU8tyvn7m7fxo_bHjE")
+ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "8791088494:AAH79K9sBWOpYVVM6Q6DXRys_XtI0F1IYvs")
+ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "8400208941")
 
 USTOZLAR = [
     "Ustoz 1",
