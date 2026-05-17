@@ -2,8 +2,7 @@ from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 from database import ovoz_bergan, ovoz_saqlash, natijalar
-from admin import admin_ga_yuborish
-from config import USTOZLAR
+from config import USTOZLAR, ADMIN_CHAT_ID
 
 router = Router()
 
@@ -11,12 +10,45 @@ def ovoz_markup():
     tugmalar = [[KeyboardButton(text=ustoz)] for ustoz in USTOZLAR]
     return ReplyKeyboardMarkup(keyboard=tugmalar, resize_keyboard=True)
 
+def admin_markup():
+    return ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text="📊 Umumiy ovozlar")]],
+        resize_keyboard=True
+    )
+
 @router.message(Command("start"))
 async def start(message: Message):
+    # Admin tekshirish
+    if str(message.from_user.id) == str(ADMIN_CHAT_ID):
+        await message.answer("👋 Admin panel", reply_markup=admin_markup())
+        return
+
+    # Foydalanuvchi
     if ovoz_bergan(message.from_user.id):
         await message.answer("❌ Siz allaqachon ovoz bergansiz!")
         return
+
     await message.answer("🗳 Xush kelibsiz! Kimga ovoz berasiz?", reply_markup=ovoz_markup())
+
+@router.message(F.text == "📊 Umumiy ovozlar")
+async def umumiy_ovozlar(message: Message):
+    if str(message.from_user.id) != str(ADMIN_CHAT_ID):
+        return
+
+    data = natijalar()
+    if not data:
+        await message.answer("Hali ovoz berilmagan.")
+        return
+
+    umumiy = sum(son for _, son in data)
+    text = "📊 Umumiy ovozlar:\n\n"
+    for i, (ustoz, son) in enumerate(data, 1):
+        foiz = round((son / umumiy) * 100, 1)
+        text += f"{i}. {ustoz} — {son} ovoz ({foiz}%)\n"
+    text += f"\n👥 Jami: {umumiy} ovoz"
+    text += f"\n🏆 Lider: {data[0][0]} — {data[0][1]} ovoz"
+
+    await message.answer(text)
 
 @router.message(F.text.in_(USTOZLAR))
 async def ovoz_qabul(message: Message):
@@ -37,19 +69,3 @@ async def ovoz_qabul(message: Message):
     for i, (ustoz, son) in enumerate(data, 1):
         text += f"{i}. {ustoz} — {son} ovoz\n"
     text += f"\n🏆 Hozircha lider: {data[0][0]} — {data[0][1]} ovoz"
-    admin_ga_yuborish(text)
-
-@router.message(Command("natija"))
-async def natija(message: Message):
-    data = natijalar()
-    if not data:
-        await message.answer("Hali ovoz berilmagan.")
-        return
-
-    text = "📊 Yakuniy natijalar:\n\n"
-    for i, (ustoz, son) in enumerate(data, 1):
-        text += f"{i}. {ustoz} — {son} ovoz\n"
-    text += f"\n🏆 G'olib: {data[0][0]} — {data[0][1]} ovoz"
-
-    await message.answer(text)
-    admin_ga_yuborish(text)

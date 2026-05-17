@@ -4,14 +4,11 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from config import TOKEN
 from database import db_create
 from handlers import router
-from admin_handlers import admin_router
 
 async def main():
     db_create()
-
     bot = Bot(token=TOKEN)
     dp = Dispatcher(storage=MemoryStorage())
-    dp.include_router(admin_router)
     dp.include_router(router)
 
     print("Bot ishga tushdi...")
