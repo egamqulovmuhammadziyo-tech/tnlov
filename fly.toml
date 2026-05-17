@@ -1,0 +1,8 @@
+app = "tanlov-bot"
+primary_region = "fra"
+
+[build]
+  builder = "paketobuildpacks/builder:base"
+
+[processes]
+  app = "python index.py"
