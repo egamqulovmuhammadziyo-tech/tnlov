@@ -1,6 +1,9 @@
 import sqlite3
 import threading
-
+def reset_ovozlar():
+    conn = get_conn()
+    conn.execute("DELETE FROM ovozlar")
+    conn.commit()
 local = threading.local()
 
 def get_conn():

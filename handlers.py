@@ -3,8 +3,11 @@ from aiogram.filters import Command
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 from database import ovoz_bergan, ovoz_saqlash, natijalar
 from config import USTOZLAR, ADMIN_CHAT_ID
-
+from database import ovoz_bergan, ovoz_saqlash, natijalar, reset_ovozlar
 router = Router()
+
+
+
 
 def ovoz_markup():
     tugmalar = [[KeyboardButton(text=ustoz)] for ustoz in USTOZLAR]
@@ -22,7 +25,44 @@ async def start(message: Message):
     if str(message.from_user.id) == str(ADMIN_CHAT_ID):
         await message.answer("👋 Admin panel", reply_markup=admin_markup())
         return
+def admin_markup():
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="📊 Umumiy ovozlar")],
+            [KeyboardButton(text="🔄 Ovozlarni reset qilish")]
+        ],
+        resize_keyboard=True
+    )
 
+@router.message(F.text == "🔄 Ovozlarni reset qilish")
+async def reset_handler(message: Message):
+    if str(message.from_user.id) != str(ADMIN_CHAT_ID):
+        return
+
+    # Tasdiqlash so'rash
+    markup = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="✅ Ha, reset qilish")],
+            [KeyboardButton(text="❌ Yo'q, bekor qilish")]
+        ],
+        resize_keyboard=True
+    )
+    await message.answer("⚠️ Hamma ovozlar o'chib ketadi! Davom etasizmi?", reply_markup=markup)
+
+@router.message(F.text == "✅ Ha, reset qilish")
+async def reset_tasdiqlash(message: Message):
+    if str(message.from_user.id) != str(ADMIN_CHAT_ID):
+        return
+
+    reset_ovozlar()
+    await message.answer("✅ Barcha ovozlar o'chirildi!", reply_markup=admin_markup())
+
+@router.message(F.text == "❌ Yo'q, bekor qilish")
+async def reset_bekor(message: Message):
+    if str(message.from_user.id) != str(ADMIN_CHAT_ID):
+        return
+
+    await message.answer("❌ Reset bekor qilindi.", reply_markup=admin_markup())
     # Foydalanuvchi
     if ovoz_bergan(message.from_user.id):
         await message.answer("❌ Siz allaqachon ovoz bergansiz!")
