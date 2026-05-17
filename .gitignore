@@ -1,0 +1,6 @@
+__pycache__/
+ovozlar.db
+ovozlar.db-shm
+ovozlar.db-wal
+*.pyc
+*.pyo
